@@ -1,0 +1,330 @@
+\documentclass[10pt]{beamer}
+\hypersetup{pdfpagemode=FullScreen}
+\input{preamble}
+
+\title[Master Thesis]{Automated classification of syllable types in vocal sequences of pups of the greater sac-winged bat Saccopteryx bilineata}
+\author{Simon Hiller}
+
+\institute{Andreas Fischer \&
+Daniel Wegmann
+
+University of Bern - Fribourg}
+\date{28. February 2021}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Uncomment these lines for an automatically generated outline.
+%\begin{frame}{Outline}
+%  \tableofcontents
+%\end{frame}
+
+\section{Overview}
+
+\begin{frame}{Intro}
+\textbf{Around five years ago I initially become contact with the time-consuming workout of manual labeling the syllables in audio recording of vocalisation sequences.}
+\end{frame}
+
+\begin{frame}{How}
+\begin{itemize}
+\item Model: deep learning model with pattern searching abilities.
+\item Approach: supervised learning
+\begin{itemize}
+\item Input: spectrogram
+\item Output: corresponding syllable type
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Presentation Overview}
+%\centering
+\begin{itemize}
+\item Introduction
+\item Difficulties
+\item Methods
+\item Results
+\item Discussion
+\item Outlook
+\item Questions
+\end{itemize}
+\end{frame}
+
+\section{Introduction}
+\begin{frame}{Language}
+\begin{itemize}
+\item How we become capable of learning language
+\item Can language only be applied to human vocalisation
+\end{itemize}
+\end{frame}
+
+\section{Difficulties}
+\begin{frame}{Bioacoustic}
+\begin{itemize}
+\item Huge amount of recordings which needs to be labeled
+\item How to normalize the recordings in respect to the place of recording
+\item How to handle noise
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Syllables}
+\begin{itemize}
+\item Vary in size
+\item Gradual change of a syllable type during development of pups vocalization
+\item How to segment
+\end{itemize}
+\end{frame}
+
+\section{Methods}
+\begin{frame}{Overview}
+\begin{figure}
+\centering
+    \includegraphics[width=1\linewidth]{image/pipeline.pdf}
+    \caption{Flow diagram of the data.}
+    \label{fig:pipeline}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Preprocessing overview}
+\begin{itemize}
+\item Filter out too short syllables and syllable types with not enough samples
+\item Generate silent audio files per recording and create noise profiles with them
+\item Extract audio parts which belongs to a syllable by the defined start and end time point
+\item Left pad the extracted syllables to the same maximum length over all with the signal data from the background audio file
+\item Apply noise reduction filter to the audio files based on the generated noise profiles.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Preprocessing silent segmentation}
+\begin{equation}\label{eq:silent_detection_1}
+silent = \begin{cases} 1 & mse < mean(mse \text{ without label})+1, \\ 0 & \text{otherwise}. \end{cases}
+\end{equation}
+\begin{figure}
+\centering
+    \includesvg[inkscapelatex=false,width=1\textwidth]{image/silent_detection_sample1.svg}
+    \caption{Plot of the result of the silence detection algorithm. The blackcurrant rectangles are the silent parts, on both sides the piece of \SI{5}{\milli\second} by which the silent parts were reduced is shown in transparent light blue. The yellow rectangle is a labelling part.}
+    \label{fig:silent_detection_sample1}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Multilayer perceptron}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=1\textwidth]{image/mlp_schema.pdf}
+  \caption{A diagram of a single perceptron, along with its position within a multilayer perceptron with fully connected layers.}
+  \label{fig:mlp_schema}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Long short term memory}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=.7\textwidth]{image/lstm_schema.pdf}
+  \caption{A diagram of a single LSTM cell and which values are recurrently used when processing a feature vector $x_1,\hdots,x_n$.}
+  \label{fig:lstm_schema}
+\end{figure}
+\end{frame}
+
+
+\begin{frame}{LSTM model}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=1\textwidth]{image/ml_model_lstm.pdf}\hfill
+  \caption{Visualisation of the LSTM architecture. The size of the elements does not correspond exactly to their real dimension numbers.}
+  \label{fig:ml_model_lstm}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Convolution layer}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=1\textwidth]{image/cnn_schema.pdf}
+  \caption{A diagram of a single convolution layer depicts the fate of the features through them.}
+  \label{fig:cnn_schema}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Convolution neural network model}
+\begin{figure}[H]
+\centering
+  \includegraphics[width=1\textwidth]{image/ml_model_cnn.pdf}\hfill
+  \caption{Visualisation of the CNN architecture. The size of the elements do not correspond exactly to their real dimension numbers.}
+  \label{fig:ml_model_cnn}
+\end{figure}
+\end{frame}
+
+
+\section{Result}
+\begin{frame}{Test experiments}
+\begin{itemize}
+\item We conducted 3 test experiments:
+\begin{itemize}
+\item compressed
+\item variable length
+\item left padded
+\end{itemize}
+\item 
+\end{itemize}
+\end{frame}
+
+
+\section{Result}
+\begin{frame}{Test experiments - compressed}
+\begin{figure}[ht!]
+\centering
+  \begin{tikzpicture}
+  \node (compressed)  {\includegraphics[scale=0.333]{image/generated/compressed_spectorgram_b2_compressed.png}};
+  \node[below=of compressed, yshift=32] {\footnotesize 100};
+  \node[left=of compressed, node distance=0cm, rotate=90, anchor=center,yshift=-25] {\footnotesize 256};
+  \node[below=of compressed, yshift=10] (base)  {\includegraphics[scale=0.333]{image/generated/compressed_spectorgram_b2.png}};
+  \node[below=of base, node distance=0cm, yshift=32] {\footnotesize 911};
+  \node[left=of base, node distance=0cm, rotate=90, anchor=center,yshift=-25] {\footnotesize 256};
+  \end{tikzpicture}
+  \caption{Visualisation of a compression ratio of 1:9 on the basis of the longest syllable sample.}
+  \label{fig:compressed_spectorgram_b2}
+\end{figure}
+\end{frame}
+\begin{frame}{Test experiments - compressed}
+\begin{columns}
+\column{0.5\textwidth}
+\vspace{-3mm}
+\begin{figure}[ht!]
+\centering
+  \includesvg[inkscapelatex=false, width=.97\textwidth]{image/generated/model_distribution_sct_compressed.svg}
+  \label{fig:model_distribution_sct_compressed}
+\end{figure}
+\column{0.5\textwidth}
+\vspace{-3mm}
+\begin{table}[h!]
+\scalebox{.48}{\input{table/generated/result_overview_sct_compressed}}
+%\resizebox{1\linewidth}{!}{\input{table/generated/result_overview_sct_compressed}}
+\label{tab:result_overview_sct_compressed}
+\end{table}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Test experiments - variable length}
+\begin{columns}
+\column{0.5\textwidth}
+\vspace{-3mm}
+\begin{figure}[ht!]
+\centering
+  \includesvg[inkscapelatex=false, width=.77\textwidth]{image/generated/model_distribution_sct_variable_length.svg}
+  \label{fig:model_distribution_sct_compressed}
+\end{figure}
+\column{0.5\textwidth}
+\vspace{-2.5cm}
+\begin{table}[h!]
+\scalebox{.48}{\input{table/generated/result_overview_sct_vl}}
+%\resizebox{1\linewidth}{!}{\input{table/generated/result_overview_sct_compressed}}
+\label{tab:result_overview_sct_compressed}
+\end{table}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Test experiments - padded}
+\begin{columns}
+\column{0.475\textwidth}
+\vspace{-3mm}
+\begin{figure}[ht!]
+\centering
+  \includesvg[inkscapelatex=false, width=.97\textwidth]{image/generated/model_distribution_sct_padded.svg}
+  \label{fig:model_distribution_sct_compressed}
+\end{figure}
+\column{0.525\textwidth}
+\vspace{-3mm}
+\begin{table}[h!]
+\scalebox{.48}{\input{table/generated/result_overview_sct_padded}}
+%\resizebox{1\linewidth}{!}{\input{table/generated/result_overview_sct_compressed}}
+\label{tab:result_overview_sct_compressed}
+\end{table}
+\end{columns}
+\end{frame}
+
+\begin{frame}{Prototype experiments}
+\begin{itemize}
+\item We evaluate a pipeline for a prototype of an automated syllable type classifier
+\item Adapted pipeline:
+\begin{itemize}
+\item split audio recordings into slices in a windowing manner defined by window length and strides.
+\item The audio slice is assigned to the corresponding syllable type as soon as a defined percentage or more of a slice is covered by a syllable annotation or the boundaries of the syllable annotation lie within the window.
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+
+\begin{frame}{Audio splitting}
+\begin{figure}
+\centering
+    \includesvg[inkscapelatex=false,width=1\textwidth]{image/moving_window.svg}
+    \caption{Visualisation of the audio splitting algorithm with a spectrogram as background from a labelled audio file. The rectangle with the purple borders represents the moving window with the assigned labels on the upper x-axes. The yellow rectangle covers the boundaries of the annotated syllable. For visualisation reasons, we used parameters (\SI{30}{\milli\second} window length and \SI{34}{\milli\second} strides) that do not result in overlapping windows.}
+    \label{fig:moving_window}
+\end{figure}
+\end{frame}
+
+
+\section{Outlook}
+\begin{frame}{Feature work}
+\begin{itemize}
+\item Feature representation:
+\begin{itemize}
+\item bit-representation
+\item different HOG variants
+\end{itemize}
+\item Pipeline modification:
+\begin{itemize}
+\item Syllable segmentation based on static functions
+\item Syllable segmentation based on trainable functions aké artificial neural networks
+\end{itemize}
+\item software optimization:
+\begin{itemize}
+\item memory consumption
+\item UX Design (GUI)
+\item determine best prior
+\end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Acknowledgments}
+\centering
+I would like to say a big thank you to my advisers:
+
+\bigskip
+Ahana Aurora Fernandez
+
+Andreas Fischer
+
+Daniel Wegmann
+
+\bigskip
+As well as Madleina Caduff, the lab in Fribourg and Dominik and Gael for proofreading my thesis.
+
+\end{frame}
+
+\begin{frame}{References}
+
+\textbf{Papers Referenced}
+
+\textbf{Numerical Scheme Pictures (slides 10, 11)}
+
+\end{frame}
+
+\begin{frame}{}
+\centering
+{\huge $\textbf{Questions?}$}
+\end{frame}
+
+\hypersetup{bookmarksdepth=0}
+\appendix
+\section{Appendix}
+\begin{frame}{Backpropagation}
+
+\end{frame}
+\begin{frame}{Backpropagation}
+
+\end{frame}
+
+
+\end{document}
